@@ -1,0 +1,53 @@
+name: Build Android Kernel for S922X
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-kernel:
+    runs-on: ubuntu-latest
+
+    env:
+      ARCH: arm64
+      CROSS_COMPILE: aarch64-linux-android-
+      KERNEL_DEFCONFIG: meson_g12b_defconfig
+      KERNEL_SOURCE: android_kernel_voodik_odroidg12
+      KERNEL_BRANCH: lineage-20.0_odroidg12_t_64_r44
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y bc bison flex libssl-dev make gcc \
+          libncurses5-dev libelf-dev git wget curl
+
+    - name: Download Android NDK (for cross-compiler)
+      run: |
+        wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+        unzip android-ndk-r25c-linux.zip
+        echo "ANDROID_NDK=$(pwd)/android-ndk-r25c" >> $GITHUB_ENV
+        echo "PATH=$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" >> $GITHUB_ENV
+
+    - name: Clone kernel source
+      run: |
+        git clone https://github.com/voodik/${{ env.KERNEL_SOURCE }} -b ${{ env.KERNEL_BRANCH }} kernel
+
+    - name: Build kernel
+      working-directory: kernel
+      run: |
+        make $KERNEL_DEFCONFIG
+        make -j$(nproc)
+
+    - name: Upload kernel artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: kernel-build
+        path: |
+          arch/arm64/boot/Image
+          arch/arm64/boot/dts/amlogic/*.dtb
