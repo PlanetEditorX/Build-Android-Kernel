@@ -13,7 +13,7 @@ jobs:
     env:
       ARCH: arm64
       CROSS_COMPILE: aarch64-linux-android-
-      KERNEL_DEFCONFIG: meson_g12b_defconfig
+      KERNEL_DEFCONFIG: odroidn2_android_defconfig
       KERNEL_SOURCE: android_kernel_voodik_odroidg12
       KERNEL_BRANCH: lineage-20.0_odroidg12_t_64_r44
 
@@ -41,7 +41,7 @@ jobs:
     - name: Build kernel
       working-directory: kernel
       run: |
-        make $KERNEL_DEFCONFIG
+        make ARCH=$ARCH $KERNEL_DEFCONFIG
         make -j$(nproc)
 
     - name: Upload kernel artifacts
