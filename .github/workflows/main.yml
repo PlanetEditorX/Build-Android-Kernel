@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-kernel:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-arm
 
     env:
       ARCH: arm64
@@ -25,7 +25,8 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y bc bison flex libssl-dev make gcc \
-          libncurses5-dev libelf-dev git wget curl build-essential
+          libncurses5-dev libelf-dev git wget curl build-essential \
+          gcc-aarch64-linux-gnu
 
     - name: Download Android NDK
       run: |
